@@ -1,21 +1,22 @@
-// ai-excited-01 entry (Node 22, standard library only).
+// The Paper Dragon Wakes — ai-excited-01 entry.
 //
-// The entry is the image beside this file: a stained-glass phoenix
-// bursting out of a cathedral window. The program does one thing —
-// it copies that image to the output path the judge reads, so the
-// judge sees exactly the bytes in the repository, nothing more.
-//
-// In the grader the output goes to /output/entry.png. Outside the
-// grader, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-//
-// The copy is byte for byte, so two runs always produce the same file.
+// A red-and-gold origami dragon unfolds mid-flight above a misty
+// mountain valley at dawn, tiny white paper cranes trailing behind
+// it. This program carries that image to the output directory so
+// the judge can see it: it copies entry.png, byte for byte, into
+// MAKEFUN_OUTPUT_DIR (or /output when that is not set).
 
-import { copyFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { copyFile, mkdir, stat } from "node:fs/promises";
+import { join } from "node:path";
 
-const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-const source = new URL('./entry.png', import.meta.url);
+const sourceImage = "entry.png";
+const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+const destination = join(outputDir, "entry.png");
 
-mkdirSync(outDir, { recursive: true });
-copyFileSync(source, join(outDir, 'entry.png'));
+// Make sure the source image is really there before we copy it.
+const source = await stat(sourceImage);
+
+await mkdir(outputDir, { recursive: true });
+await copyFile(sourceImage, destination);
+
+console.log(`Copied ${source.size} bytes to ${destination}`);
