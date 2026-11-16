@@ -1,22 +1,31 @@
-// The Paper Dragon Wakes — ai-excited-01 entry.
+// The Paper Dragon Wakes — entry for make.fun ai-excited-01.
 //
-// A red-and-gold origami dragon unfolds mid-flight above a misty
-// mountain valley at dawn, tiny white paper cranes trailing behind
-// it. This program carries that image to the output directory so
-// the judge can see it: it copies entry.png, byte for byte, into
-// MAKEFUN_OUTPUT_DIR (or /output when that is not set).
+// The image: a red-and-gold origami dragon unfolding mid-flight above a
+// misty mountain valley at dawn, tiny white paper cranes trailing behind
+// it — paper coming alive, caught at the exact moment it takes wing.
+//
+// All this program does is place that finished image where the judge
+// expects it: it copies entry.png into the output folder, byte for byte,
+// so every run produces exactly the same file.
 
-import { copyFile, mkdir, stat } from "node:fs/promises";
+import { copyFileSync, existsSync, mkdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const sourceImage = "entry.png";
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
-const destination = join(outputDir, "entry.png");
+const sourceName = "entry.png";
+const targetName = "entry.png";
 
-// Make sure the source image is really there before we copy it.
-const source = await stat(sourceImage);
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 
-await mkdir(outputDir, { recursive: true });
-await copyFile(sourceImage, destination);
+const sourcePath = join(import.meta.dirname, sourceName);
 
-console.log(`Copied ${source.size} bytes to ${destination}`);
+// Make sure the image is really there before touching the output folder.
+if (!existsSync(sourcePath)) {
+  throw new Error(`missing source image: ${sourcePath}`);
+}
+
+mkdirSync(outDir, { recursive: true });
+
+copyFileSync(sourcePath, join(outDir, targetName));
+
+const copiedBytes = statSync(join(outDir, targetName)).size;
+console.log(`wrote ${targetName} (${copiedBytes} bytes) to ${outDir}`);
